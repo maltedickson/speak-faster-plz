@@ -1,0 +1,14 @@
+{
+  "manifest_version": 2,
+  "name": "Speak Faster Plz",
+  "version": "0.1",
+
+  "description": "Speeds up videos.",
+
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["script.js"]
+    }
+  ]
+}
