@@ -1,47 +1,57 @@
-step = 0.25;
+const videos = Array.from(document.getElementsByTagName("video"));
 
-const legendId = "speed-legend";
+let currentSrc = "";
 
-document.addEventListener("keypress", (e) => {
-  const video = document.querySelector("video");
+videos.forEach((video) => {
+  video.addEventListener("ratechange", (e) => {
+    if (video.currentSrc !== currentSrc) {
+      return;
+    }
+    displayController(video);
+  });
+  video.addEventListener("play", () => {
+    currentSrc = video.currentSrc;
+    displayController(video);
+  });
+});
+
+window.addEventListener("keypress", (e) => {
+  console.log(currentSrc);
+  const video = videos.find((video) => video.currentSrc === currentSrc);
   if (!video) {
     return;
   }
-
-  const old_legend = document.getElementById(legendId);
-  if (old_legend) {
-    old_legend.remove();
-  }
-
-  let newPlaybackRate = video.playbackRate;
-
   switch (e.code) {
-    case "KeyS":
-      newPlaybackRate -= step;
-      break;
     case "KeyD":
-      newPlaybackRate += step;
+      video.playbackRate += 0.25;
+      break;
+    case "KeyS":
+      video.playbackRate -= 0.25;
+      break;
+    case "KeyX":
+      video.currentTime += 5;
+      break;
+    case "KeyZ":
+      video.currentTime -= 5;
       break;
   }
-  newPlaybackRate = Math.max(0, newPlaybackRate);
-  video.playbackRate = newPlaybackRate;
+});
 
-  const legend = document.createElement("div");
-  legend.setAttribute("id", legendId);
-  legend.innerText = `${newPlaybackRate.toFixed(2)}`;
+function displayController(video) {
+  const controllerId = "speak-faster-plz-controller";
+  const old_controller = document.getElementById(controllerId);
+  if (old_controller) {
+    old_controller.remove();
+  }
+  const controller = document.createElement("div");
+  controller.setAttribute("id", controllerId);
+  controller.setAttribute("class", "speak-faster-plz-controller");
+  controller.innerText = `${video.playbackRate.toFixed(2)}`;
 
   const videoContainer = video.parentElement;
   if (videoContainer.style.position != "absolute") {
     videoContainer.style.position = "relative";
   }
-  legend.style.position = "absolute";
-  legend.style.top = "0px";
-  legend.style.left = "0px";
-  legend.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
-  legend.style.color = "white";
-  legend.style.padding = "5px";
-  legend.style.borderRadius = "5px";
-  legend.style.zIndex = "1000";
 
-  videoContainer.appendChild(legend);
-});
+  videoContainer.appendChild(controller);
+}
