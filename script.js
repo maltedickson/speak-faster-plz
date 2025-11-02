@@ -1,23 +1,52 @@
-const videos = Array.from(document.getElementsByTagName("video"));
-
 let currentSrc = "";
 
-videos.forEach((video) => {
-  video.addEventListener("ratechange", (e) => {
-    if (video.currentSrc !== currentSrc) {
-      return;
+let videos = new Set();
+
+function handleVideoElement(video) {
+  const already_added = videos.has(video);
+  if (already_added) {
+    return;
+  }
+
+  videos.add(video);
+  console.log(videos);
+  video.addEventListener("ratechange", () => {
+    if (video.currentSrc === currentSrc) {
+      displayController(video);
     }
-    displayController(video);
   });
   video.addEventListener("play", () => {
     currentSrc = video.currentSrc;
     displayController(video);
   });
-});
+}
+
+Array.from(document.getElementsByTagName("video")).forEach(handleVideoElement);
+
+function observeDOMChanges() {
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeName === "VIDEO") {
+          handleVideoElement(node);
+        }
+        if (node.querySelectorAll) {
+          node.querySelectorAll("video").forEach(handleVideoElement);
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+}
+
+observeDOMChanges();
 
 window.addEventListener("keypress", (e) => {
-  console.log(currentSrc);
-  const video = videos.find((video) => video.currentSrc === currentSrc);
+  const video = videos.values().find((video) => video.currentSrc === currentSrc);
   if (!video) {
     return;
   }
